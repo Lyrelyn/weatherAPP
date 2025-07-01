@@ -17,7 +17,6 @@ import com.llw.library.network.observer.BaseObserver;
 import androidx.lifecycle.MutableLiveData;
 
 //天气存储库，数据处理(实况天气、7天天气预报)
-
 @SuppressLint("CheckResult")
 public class WeatherRepository {
 

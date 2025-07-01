@@ -180,7 +180,7 @@ public class MusicActivity extends AppCompatActivity {
         }
 
         title.setText(music.getTitle());
-        covertest.setImageResource(R.drawable.music);
+        covertest.setImageResource(R.drawable.music1);
         end.setText(music.getTime());
         seekBar.setMax(music.getDuration() / 1000);
 

@@ -18,6 +18,10 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ArrayAdapter; // 添加这行导入ArrayAdapter类
+import java.util.ArrayList;
+import java.util.List;
+import android.widget.Spinner;
 
 import com.llw.goodweather.R;
 import com.llw.goodweather.db.MySQLiteOpenHelper;
@@ -37,8 +41,13 @@ public class DailyManager extends AppCompatActivity implements View.OnClickListe
     private SQLiteDatabase myDatabase;
     private TextView mySchedule[] = new TextView[5];
     private static String username;
+    private static int userId;
     private boolean isChecked;
     private Menu mMenu;
+    private Spinner spinnerYear, spinnerMonth, spinnerDay;
+    private Button btnFilter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +56,7 @@ public class DailyManager extends AppCompatActivity implements View.OnClickListe
         // 获取传递的Intent对象
         Intent intent = getIntent();
         username = intent.getStringExtra("userName"); // 修复了用户名未正确初始化的问题
+        userId = intent.getIntExtra("userId", 0);
         isChecked = intent.getBooleanExtra("isChecked", false); // 获取布尔类型的值，如果没有传递或者出错，使用默认值 false
         initView();
 
@@ -60,41 +70,50 @@ public class DailyManager extends AppCompatActivity implements View.OnClickListe
         queryByDateAndUserId(dateToday, username);
        // Log.d("SB",dateToday);
       //  Log.d("SB",username);
+        // 初始化筛选控件
+        initFilterViews();
 
 
         //点击菜单栏打开菜单
-        ImageView iconView=findViewById(R.id.menu);
+//        ImageView iconView=findViewById(R.id.menu);
 
        // 为图标添加点击事件监听器
-        iconView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 创建PopupMenu对象，并关联到图标View
-                PopupMenu popupMenu = new PopupMenu(DailyManager.this, iconView);
-
-                // 加载菜单布局
-                popupMenu.getMenuInflater().inflate(R.menu.menu_manager, popupMenu.getMenu());
-
-                // 设置菜单项点击事件监听器
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        int id = item.getItemId();
-                        // 根据菜单项的ID执行相应的操作
-                        if (id == R.id.item_login_register) {
-                            // 执行登录注册操作
-                            Intent intent1=new Intent(DailyManager.this,ManagerActivity.class);
-                            startActivity(intent1);
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-
-                // 显示PopupMenu
-                popupMenu.show();
-            }
-        });
+//        iconView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // 创建PopupMenu对象，并关联到图标View
+//                //PopupMenu popupMenu = new PopupMenu(DailyManager.this, iconView);
+//
+//                // 加载菜单布局
+//                //popupMenu.getMenuInflater().inflate(R.menu.menu_manager, popupMenu.getMenu());
+//
+//                // 设置菜单项点击事件监听器
+//                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+//                    @Override
+//                    public boolean onMenuItemClick(MenuItem item) {
+//                        int id = item.getItemId();
+//                        // 根据菜单项的ID执行相应的操作
+//                        if (id == R.id.item_login_register) {
+//                            // 执行登录注册操作
+//                            Intent intent1=new Intent(DailyManager.this,ManagerActivity.class);
+//                            startActivity(intent1);
+//                            return true;
+//                        }else if(id == R.id.item_settings){
+//                            Intent intent1=new Intent(DailyManager.this,UserInfoActivity.class);
+//                            intent1.putExtra("isChecked", isChecked);
+//                            intent1.putExtra("userId", userId);
+//                            intent1.putExtra("userName", username);
+//                            startActivity(intent1);
+//                            return true;
+//                        }
+//                        return false;
+//                    }
+//                });
+//
+//                // 显示PopupMenu
+//                popupMenu.show();
+//            }
+//        });
 
 
 
@@ -124,14 +143,11 @@ public class DailyManager extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 Intent intent;
-                if (isChecked) {
-                    // 如果 isChecked 是 true，跳转到 MainActivity
-                    intent = new Intent(DailyManager.this, MainActivity.class);
-                    intent.putExtra("isChecked", isChecked);
-                } else {
-                    // 如果 isChecked 是 false，跳转到 ManagerActivity
-                    intent = new Intent(DailyManager.this, ManagerActivity.class);
-                }
+
+                // 如果 isChecked 是 true，跳转到 MainActivity
+                intent = new Intent(DailyManager.this, MainActivity.class);
+                intent.putExtra("isChecked", isChecked);
+
                 startActivity(intent);
             }
         });
@@ -278,6 +294,61 @@ private void editSchedule(View v) {
             cursor.close();
         }
         return description;
+    }
+
+    // 初始化筛选控件
+    private void initFilterViews() {
+        spinnerYear = findViewById(R.id.spinner_year);
+        spinnerMonth = findViewById(R.id.spinner_month);
+        spinnerDay = findViewById(R.id.spinner_day);
+        btnFilter = findViewById(R.id.btn_filter);
+
+        // 初始化年份数据
+        List<String> years = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        for (int i = currentYear - 10; i <= currentYear + 10; i++) {
+            years.add(String.valueOf(i));
+        }
+        ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, years);
+        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerYear.setAdapter(yearAdapter);
+
+        // 初始化月份数据
+        List<String> months = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            months.add(String.valueOf(i));
+        }
+        ArrayAdapter<String> monthAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, months);
+        monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMonth.setAdapter(monthAdapter);
+
+        // 初始化日期数据
+        List<String> days = new ArrayList<>();
+        for (int i = 1; i <= 31; i++) {
+            days.add(String.valueOf(i));
+        }
+        ArrayAdapter<String> dayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, days);
+        dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDay.setAdapter(dayAdapter);
+
+        // 设置筛选按钮点击事件
+        btnFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String selectedYear = spinnerYear.getSelectedItem().toString();
+                String selectedMonth = spinnerMonth.getSelectedItem().toString();
+                String selectedDay = spinnerDay.getSelectedItem().toString();
+                String filterDate = selectedYear + "-" + selectedMonth + "-" + selectedDay;
+                // 隐藏所有日程
+                for (TextView vv : mySchedule) {
+                    vv.setText("");
+                    vv.setVisibility(View.GONE);
+                }
+                // 查询筛选后的日程
+                queryByDateAndUserId(filterDate, username);
+            }
+        });
     }
 
 }

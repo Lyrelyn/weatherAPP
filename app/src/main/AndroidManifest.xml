@@ -44,7 +44,16 @@
 
         <activity
             android:name=".ui.MusicListActivity"
-            android:exported="true"></activity>
+            android:exported="true">
+
+        </activity>
+        <activity android:name=".ui.MapWeatherActivity">
+            <!-- 可以根据需要添加 intent-filter -->
+        </activity>
+        <activity
+            android:name=".manage.UserInfoActivity"
+            android:exported="false">
+        </activity>
 
         <activity
             android:name=".ui.MusicActivity"
@@ -62,9 +71,11 @@
         <activity
             android:name=".manage.ManagerActivity"
             android:exported="true" />
+        <receiver android:name=".manage.AlarmReceiver"
+            />
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="PyD9EATHmmhZIPTZKTFYZOlUu25DhISp" /><!--百度地图API密钥-->
+            android:value="7k6NMT60WBqDT2BXqCfrte0XLuEw0Al3" /><!--百度地图API密钥PyD9EATHmmhZIPTZKTFYZOlUu25DhISp-->
 
         <!--后台长时间执行的组件操作-->
         <service

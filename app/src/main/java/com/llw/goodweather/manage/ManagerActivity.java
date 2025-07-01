@@ -19,7 +19,7 @@ import com.llw.goodweather.ui.MainActivity;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-//实现日程中心用户登录功能
+//实现日程
 public class ManagerActivity extends AppCompatActivity {
 
     private EditText usernameEditText, passwordEditText;
@@ -77,7 +77,7 @@ public class ManagerActivity extends AppCompatActivity {
             db.close();
 
             // 登录成功，跳转到 DailyManager 并传递用户ID和用户名
-            Intent intent = new Intent(ManagerActivity.this, DailyManager.class);
+            Intent intent = new Intent(ManagerActivity.this,MainActivity.class);
             intent.putExtra("isChecked", isChecked);
             intent.putExtra("userId", userId);
             intent.putExtra("userName", username);

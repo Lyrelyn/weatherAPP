@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".manage.ManagerActivity"
-    android:background="@drawable/main_bg20">
+    android:background="@drawable/splash1">
 
     <EditText
         android:id="@+id/usernameEditText"

@@ -12,36 +12,36 @@
 
     <!-- 日程标题 -->
 
-    <ImageView
-        android:id="@+id/exit6"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/round_button_bg"
-        android:padding="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_round_close_24" />
+<!--    <ImageView-->
+<!--        android:id="@+id/exit6"-->
+<!--        android:layout_width="40dp"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:layout_marginStart="28dp"-->
+<!--        android:layout_marginTop="32dp"-->
+<!--        android:background="@drawable/round_button_bg"-->
+<!--        android:padding="8dp"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:srcCompat="@drawable/ic_round_close_24" />-->
 
-    <ImageView
-        android:id="@+id/save"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="28dp"
-        android:background="@drawable/round_button_bg"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_round_check_24" />
+<!--    <ImageView-->
+<!--        android:id="@+id/save"-->
+<!--        android:layout_width="40dp"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:layout_marginTop="32dp"-->
+<!--        android:layout_marginEnd="28dp"-->
+<!--        android:background="@drawable/round_button_bg"-->
+<!--        android:padding="8dp"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:srcCompat="@drawable/ic_round_check_24" />-->
 
     <TextView
         android:id="@+id/textView9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="新建日程"
+        android:text="修改日程"
         android:textAlignment="center"
         android:textColor="#020202"
         android:textSize="28sp"

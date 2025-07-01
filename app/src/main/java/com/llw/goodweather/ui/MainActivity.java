@@ -1,7 +1,13 @@
 package com.llw.goodweather.ui;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.widget.ImageButton;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,6 +34,7 @@ import com.llw.goodweather.location.GoodLocation;
 import com.llw.goodweather.location.LocationCallback;
 import com.llw.goodweather.manage.DailyManager;
 import com.llw.goodweather.manage.ManagerActivity;
+import com.llw.goodweather.manage.UserInfoActivity;
 import com.llw.goodweather.ui.adapter.DailyAdapter;
 import com.llw.goodweather.ui.adapter.HourlyAdapter;
 import com.llw.goodweather.ui.adapter.LifestyleAdapter;
@@ -48,6 +55,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 public class MainActivity extends NetworkActivity<ActivityMainBinding> implements LocationCallback, CityDialog.SelectedCityCallback {
 
@@ -83,6 +91,8 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
     private boolean isRefresh;
     //用户是否保持登录
     private boolean isChecked;
+    private static String username;
+    private static int userId;
     /**
      * 注册意图
      */
@@ -130,8 +140,57 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         //获取城市数据
         viewModel.getAllCity();
+
         Intent intent = getIntent();
-        isChecked = intent.getBooleanExtra("isChecked", false); // 获取布尔类型的值，如果没有传递或者出错，使用默认值 false
+        username = intent.getStringExtra("userName"); // 修复了用户名未正确初始化的问题
+        userId = intent.getIntExtra("userId", 0);
+        isChecked = intent.getBooleanExtra("isChecked", true); // 获取布尔类型的值，如果没有传递或者出错，使用默认值 false
+        initView();
+        // 初始化日程中心图标按钮
+        ImageButton btnScheduleCenter = findViewById(R.id.btn_schedule_center);
+
+        // 初始化
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+
+        btnScheduleCenter.setOnClickListener(v -> {
+            // 跳转到日程中心
+            Intent scheduleIntent = new Intent(MainActivity.this, DailyManager.class);
+            scheduleIntent.putExtra("isChecked", isChecked);
+            scheduleIntent.putExtra("userId", userId);
+            scheduleIntent.putExtra("userName", username);
+            startActivity(scheduleIntent);
+        });
+        // 设置点击事件
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            switch (id) {
+                case R.id.nav_home:
+                    // 处理首页点击事件
+                    break;
+                case R.id.nav_music:
+                    // 跳转到音乐页面
+                    Intent musicIntent = new Intent(MainActivity.this, MusicListActivity.class);
+                    musicIntent.putExtra("isChecked", isChecked);
+                    musicIntent.putExtra("userId", userId);
+                    musicIntent.putExtra("userName", username);
+                    startActivity(musicIntent);
+                    break;
+                case R.id.nav_user_info:
+                    // 跳转到个人信息页面
+                    Intent userInfoIntent = new Intent(MainActivity.this, UserInfoActivity.class);
+                    userInfoIntent.putExtra("isChecked", isChecked);
+                    userInfoIntent.putExtra("userId", userId);
+                    userInfoIntent.putExtra("userName", username);
+                    startActivity(userInfoIntent);
+                    break;
+            }
+            return true;
+        });
+
+
+
+
     }
 
     @Override
@@ -152,8 +211,8 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
         dailyAdapter.setOnClickItemCallback(position -> showDailyDetailDialog(dailyBeanList.get(position)));
         binding.rvDaily.setAdapter(dailyAdapter);
         //生活指数列表
-        binding.rvLifestyle.setLayoutManager(new LinearLayoutManager(this));
-        binding.rvLifestyle.setAdapter(lifestyleAdapter);
+//        binding.rvLifestyle.setLayoutManager(new LinearLayoutManager(this));
+//        binding.rvLifestyle.setAdapter(lifestyleAdapter);
         //逐小时天气预报列表
         LinearLayoutManager hourlyLayoutManager = new LinearLayoutManager(this);
         hourlyLayoutManager.setOrientation(RecyclerView.HORIZONTAL);
@@ -171,6 +230,17 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
             //搜索城市
             viewModel.searchCity(mCityName);
         });
+
+        // 找到按钮并设置点击事件
+        ImageButton btnShenyangWeather = binding.materialToolbar.findViewById(R.id.btn_shenyang_weather);
+        btnShenyangWeather.setOnClickListener(v -> {
+            // 调用搜索沈阳天气的方法
+
+            selectedCity("沈阳");
+            jumpActivityIntent.launch(new Intent(mContext, ManageCityActivity.class));
+
+        });
+
         //滑动监听
         binding.layScroll.setOnScrollChangeListener((View.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             if (scrollY > oldScrollY) {
@@ -263,55 +333,53 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
     /**
      * 创建菜单
      */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        mMenu = menu;
-        //根据cityFlag设置重新定位菜单项是否显示
-        mMenu.findItem(R.id.item_relocation).setVisible(cityFlag == 1);
-        //根据使用必应壁纸的状态，设置item项是否选中
-        mMenu.findItem(R.id.item_bing).setChecked(MVUtils.getBoolean(Constant.USED_BING));
-        return true;
-    }
-
-    /**
-     * 菜单选项选中
-     */
-    @SuppressLint("NonConstantResourceId")
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.item_relocation:              //重新定位
-                startLocation();//点击重新定位item时，再次定位一下。
-                break;
-            case R.id.item_bing:                    //是否使用必应壁纸
-                item.setChecked(!item.isChecked());
-                MVUtils.put(Constant.USED_BING, item.isChecked());
-                String bingUrl = MVUtils.getString(Constant.BING_URL);
-                //更新壁纸
-                updateBgImage(item.isChecked(), bingUrl);
-                break;
-            case R.id.item_manage_city:             //管理城市
-                jumpActivityIntent.launch(new Intent(mContext, ManageCityActivity.class));
-                break;
-            case R.id.item_schedule_center:         //日程中心
-                Intent intent1;
-                if (isChecked) {
-                    // 如果 isChecked 是 true，跳转到 DailyManager
-                    intent1 = new Intent(this, DailyManager.class);
-                } else {
-                    // 如果 isChecked 是 false，跳转到 ManagerActivity
-                    intent1 = new Intent(this, ManagerActivity.class);
-                }
-                startActivity(intent1);
-                break;
-            case R.id.item_music_player:            //音乐之家
-                Intent intent2 = new Intent(this, MusicListActivity.class);
-                startActivity(intent2);
-                break;
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        mMenu = menu;
+////        //根据cityFlag设置重新定位菜单项是否显示
+////        mMenu.findItem(R.id.item_relocation).setVisible(cityFlag == 1);
+//        //根据使用必应壁纸的状态，设置item项是否选中
+////        mMenu.findItem(R.id.item_bing).setChecked(MVUtils.getBoolean(Constant.USED_BING));
+//        return true;
+//    }
+//
+//    /**
+//     * 菜单选项选中
+//     */
+//    @SuppressLint("NonConstantResourceId")
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        switch (item.getItemId()) {
+////            case R.id.item_relocation:              //重新定位
+////                startLocation();//点击重新定位item时，再次定位一下。
+////                break;
+////            case R.id.item_bing:                    //是否使用必应壁纸
+////                item.setChecked(!item.isChecked());
+////                MVUtils.put(Constant.USED_BING, item.isChecked());
+////                String bingUrl = MVUtils.getString(Constant.BING_URL);
+////                //更新壁纸
+////                updateBgImage(item.isChecked(), bingUrl);
+////                break;
+////            case R.id.item_manage_city:             //管理城市
+////                jumpActivityIntent.launch(new Intent(mContext, ManageCityActivity.class));
+////                break;
+//            case R.id.item_schedule_center:         //日程中心
+//                Intent intent1;
+//                    // 如果 isChecked 是 true，跳转到 DailyManager
+//                intent1 = new Intent(this, DailyManager.class);
+//                intent1.putExtra("isChecked", isChecked);
+//                intent1.putExtra("userId", userId);
+//                intent1.putExtra("userName", username);
+//                startActivity(intent1);
+//                break;
+//            case R.id.item_music_player:
+//                Intent intent2 = new Intent(this, MusicListActivity.class);
+//                startActivity(intent2);
+//                break;
+//        }
+//        return true;
+//    }
 
     /**
      * 更新壁纸
@@ -320,7 +388,7 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
         if (usedBing && !bingUrl.isEmpty()) {
             GlideUtils.loadImg(this, bingUrl, binding.layRoot);
         } else {
-            binding.layRoot.setBackground(ContextCompat.getDrawable(this, R.drawable.main_bg));
+            binding.layRoot.setBackground(ContextCompat.getDrawable(this, R.color.bg_color));
         }
     }
 
@@ -352,7 +420,7 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
                 if (location != null && location.size() > 0) {
                     String id = location.get(0).getId();
                     //根据cityFlag设置重新定位菜单项是否显示
-                    mMenu.findItem(R.id.item_relocation).setVisible(cityFlag == 1);
+                    //mMenu.findItem(R.id.item_relocation).setVisible(cityFlag == 1);
                     //检查到正在刷新
                     if (isRefresh) {
                         showMsg("刷新完成");
@@ -385,10 +453,10 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
                     String time = EasyDate.updateTime(nowResponse.getUpdateTime());
                     binding.tvUpdateTime.setText(String.format("最近更新时间：%s%s", EasyDate.showTimeInfo(time), time));
 
-                    binding.tvWindDirection.setText(String.format("风向     %s", now.getWindDir()));//风向
-                    binding.tvWindPower.setText(String.format("风力     %s级", now.getWindScale()));//风力
-                    binding.wwBig.startRotate();//大风车开始转动
-                    binding.wwSmall.startRotate();//小风车开始转动
+//                    binding.tvWindDirection.setText(String.format("风向     %s", now.getWindDir()));//风向
+//                    binding.tvWindPower.setText(String.format("风力     %s级", now.getWindScale()));//风力
+//                    binding.wwBig.startRotate();//大风车开始转动
+//                    binding.wwSmall.startRotate();//小风车开始转动
                 }
             });
             //天气预报返回
@@ -433,36 +501,36 @@ public class MainActivity extends NetworkActivity<ActivityMainBinding> implement
                     hourlyAdapter.notifyDataSetChanged();
                 }
             });
-            //空气质量返回
-            viewModel.airResponseMutableLiveData.observe(this, airResponse -> {
-                AirResponse.NowBean now = airResponse.getNow();
-                if (now == null) return;
-                binding.rpbAqi.setMaxProgress(300);//最大进度，用于计算
-                binding.rpbAqi.setMinText("0");//设置显示最小值
-                binding.rpbAqi.setMinTextSize(32f);
-                binding.rpbAqi.setMaxText("300");//设置显示最大值
-                binding.rpbAqi.setMaxTextSize(32f);
-                binding.rpbAqi.setProgress(Float.parseFloat(now.getAqi()));//当前进度
-                binding.rpbAqi.setArcBgColor(getColor(R.color.arc_bg_color));//圆弧的颜色
-                binding.rpbAqi.setProgressColor(getColor(R.color.arc_progress_color));//进度圆弧的颜色
-                binding.rpbAqi.setFirstText(now.getCategory());//空气质量描述 取值范围：优，良，轻度污染，中度污染，重度污染，严重污染
-                binding.rpbAqi.setFirstTextSize(44f);//第一行文本的字体大小
-                binding.rpbAqi.setSecondText(now.getAqi());//空气质量值
-                binding.rpbAqi.setSecondTextSize(64f);//第二行文本的字体大小
-                binding.rpbAqi.setMinText("0");
-                binding.rpbAqi.setMinTextColor(getColor(R.color.arc_progress_color));
-
-                binding.tvAirInfo.setText(String.format("空气%s", now.getCategory()));
-
-                binding.tvPm10.setText(now.getPm10());//PM10
-                binding.tvPm25.setText(now.getPm2p5());//PM2.5
-                binding.tvNo2.setText(now.getNo2());//二氧化氮
-                binding.tvSo2.setText(now.getSo2());//二氧化硫
-                binding.tvO3.setText(now.getO3());//臭氧
-                binding.tvCo.setText(now.getCo());//一氧化碳
-            });
-            //错误信息返回
-            viewModel.failed.observe(this, this::showLongMsg);
+//            //空气质量返回
+//            viewModel.airResponseMutableLiveData.observe(this, airResponse -> {
+//                AirResponse.NowBean now = airResponse.getNow();
+//                if (now == null) return;
+//                binding.rpbAqi.setMaxProgress(300);//最大进度，用于计算
+//                binding.rpbAqi.setMinText("0");//设置显示最小值
+//                binding.rpbAqi.setMinTextSize(32f);
+//                binding.rpbAqi.setMaxText("300");//设置显示最大值
+//                binding.rpbAqi.setMaxTextSize(32f);
+//                binding.rpbAqi.setProgress(Float.parseFloat(now.getAqi()));//当前进度
+//                binding.rpbAqi.setArcBgColor(getColor(R.color.arc_bg_color));//圆弧的颜色
+//                binding.rpbAqi.setProgressColor(getColor(R.color.arc_progress_color));//进度圆弧的颜色
+//                binding.rpbAqi.setFirstText(now.getCategory());//空气质量描述 取值范围：优，良，轻度污染，中度污染，重度污染，严重污染
+//                binding.rpbAqi.setFirstTextSize(44f);//第一行文本的字体大小
+//                binding.rpbAqi.setSecondText(now.getAqi());//空气质量值
+//                binding.rpbAqi.setSecondTextSize(64f);//第二行文本的字体大小
+//                binding.rpbAqi.setMinText("0");
+//                binding.rpbAqi.setMinTextColor(getColor(R.color.arc_progress_color));
+//
+//                binding.tvAirInfo.setText(String.format("空气%s", now.getCategory()));
+//
+//                binding.tvPm10.setText(now.getPm10());//PM10
+//                binding.tvPm25.setText(now.getPm2p5());//PM2.5
+//                binding.tvNo2.setText(now.getNo2());//二氧化氮
+//                binding.tvSo2.setText(now.getSo2());//二氧化硫
+//                binding.tvO3.setText(now.getO3());//臭氧
+//                binding.tvCo.setText(now.getCo());//一氧化碳
+//            });
+//            //错误信息返回
+//            viewModel.failed.observe(this, this::showLongMsg);
         }
     }
 

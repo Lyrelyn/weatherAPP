@@ -52,7 +52,7 @@ public class EditScheduleActivity extends AppCompatActivity  {
         Intent intent = getIntent();
         schedule = intent.getStringExtra("schedule");
         initView();
-        
+
         // 获取传递过来的日程信息
         Intent intent2 = getIntent();
         titlevalue = intent.getStringExtra("title");

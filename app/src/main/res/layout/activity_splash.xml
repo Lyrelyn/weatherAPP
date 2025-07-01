@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_bg"
+    android:background="@drawable/splash1"
     android:fitsSystemWindows="true"
     tools:context=".ui.SplashActivity">
 
@@ -12,5 +12,5 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/splash_bg" />
+        android:src="@drawable/splash1" />
 </androidx.constraintlayout.widget.ConstraintLayout>

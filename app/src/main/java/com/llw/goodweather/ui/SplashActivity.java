@@ -6,6 +6,7 @@ import android.util.Log;
 import com.llw.goodweather.Constant;
 import com.llw.goodweather.databinding.ActivitySplashBinding;
 import com.llw.goodweather.db.bean.Province;
+import com.llw.goodweather.manage.ManagerActivity;
 import com.llw.goodweather.utils.EasyDate;
 import com.llw.goodweather.utils.MVUtils;
 import com.llw.goodweather.viewmodel.SplashViewModel;
@@ -38,7 +39,9 @@ public class SplashActivity extends NetworkActivity<ActivitySplashBinding> {
         checkingStartup();
         //检查今天第一次运行
         checkFirstRunToday();
-        new Handler().postDelayed(() -> jumpActivityFinish(MainActivity.class), 1000);
+        new Handler().postDelayed(() -> jumpActivityFinish(ManagerActivity.class), 1000);
+
+
     }
 
     /**
@@ -79,16 +82,16 @@ public class SplashActivity extends NetworkActivity<ActivitySplashBinding> {
             }
         });
         //必应壁纸数据返回
-        viewModel.bingResponseMutableLiveData.observe(this, bingResponse -> {
-            if (bingResponse.getImages() == null) {
-                showMsg("未获取到必应的图片");
-                return;
-            }
-            //得到的图片地址是没有前缀的，所以加上前缀否则显示不出来
-            String bingUrl = "https://cn.bing.com" + bingResponse.getImages().get(0).getUrl();
-            Log.d(TAG, "bingUrl: " + bingUrl);
-            MVUtils.put(Constant.BING_URL, bingUrl);
-        });
+//        viewModel.bingResponseMutableLiveData.observe(this, bingResponse -> {
+//            if (bingResponse.getImages() == null) {
+//                showMsg("未获取到必应的图片");
+//                return;
+//            }
+//            //得到的图片地址是没有前缀的，所以加上前缀否则显示不出来
+//            String bingUrl = "https://cn.bing.com" + bingResponse.getImages().get(0).getUrl();
+//            Log.d(TAG, "bingUrl: " + bingUrl);
+//            MVUtils.put(Constant.BING_URL, bingUrl);
+//        });
         //错误信息返回
         viewModel.failed.observe(this, this::showLongMsg);
     }

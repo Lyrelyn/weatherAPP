@@ -18,9 +18,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.llw.goodweather.R;
 import com.llw.goodweather.WeatherApp;
 import com.llw.goodweather.db.bean.Music;
+import com.llw.goodweather.manage.UserInfoActivity;
 import com.llw.goodweather.ui.adapter.MusicAdapter;
 
 import java.lang.reflect.Field;
@@ -67,6 +70,43 @@ public class MusicListActivity extends AppCompatActivity {
 
                 }
             }
+        });
+
+        Intent intent = getIntent();
+        String username = intent.getStringExtra("userName"); // 修复了用户名未正确初始化的问题
+        int userId = intent.getIntExtra("userId", 0);
+        boolean isChecked = intent.getBooleanExtra("isChecked", true); // 获取布尔类型的值，如果没有传递或者出错，使用默认值 false
+
+        // 初始化
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        // 设置点击事件
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            switch (id) {
+                case R.id.nav_home:
+                    // 处理首页点击事件
+                    Intent intentMain = new Intent(MusicListActivity.this, MainActivity.class);
+                    intentMain.putExtra("isChecked", isChecked);
+                    intentMain.putExtra("userId", userId);
+                    intentMain.putExtra("userName", username);
+                    startActivity(intentMain);
+                    break;
+                case R.id.nav_music:
+                    // 跳转到音乐页面
+//                    Intent musicIntent = new Intent(MainActivity.this, MusicListActivity.class);
+//                    startActivity(musicIntent);
+                    break;
+                case R.id.nav_user_info:
+                    // 跳转到个人信息页面
+                    Intent userInfoIntent = new Intent(MusicListActivity.this, UserInfoActivity.class);
+                    userInfoIntent.putExtra("isChecked", isChecked);
+                    userInfoIntent.putExtra("userId", userId);
+                    userInfoIntent.putExtra("userName", username);
+                    startActivity(userInfoIntent);
+                    break;
+            }
+            return true;
         });
 
     }
@@ -131,34 +171,6 @@ public class MusicListActivity extends AppCompatActivity {
     }
 
 
-
-    //使用ContentResolver获取音乐
-//    private void getMusic(){
-//        ContentResolver contentResolver = getContentResolver();
-//       Cursor cursor = contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
-//        if (cursor!=null){
-//            while (cursor.moveToNext()){
-//                String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-//                String data = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-//                String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-//                String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-//                if (duration==null)continue;
-//                if (Integer.parseInt(duration)>5000){
-//                    int i = Integer.parseInt(duration);
-//                    String time = String.format(getString(R.string.s_s), format(i / 1000 / 60), format(i / 1000 % 60));
-//                    Music music = new Music(title, artist, data, time,i);
-//                    musicList.add(music);
-//                }
-//                musicAdapter.notifyDataSetChanged();
-//                // 检查 MusicService 对象是否为 null，然后再调用 setMusicList 方法
-//                if (App.getService() != null) {
-//                   App.getService().setMusicList(musicList);
-//                }
-//            }
-//            cursor.close();
-//        }
-//
-//    }
 
     private void getMusic() {
         // 获取 res/raw 文件夹下的所有资源 ID

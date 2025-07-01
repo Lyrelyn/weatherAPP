@@ -13,6 +13,8 @@ import com.llw.goodweather.utils.MVUtils;
 import com.llw.library.base.BaseApplication;
 import com.llw.library.network.NetworkApi;
 import com.tencent.mmkv.MMKV;
+import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.CoordType;
     /**
      *该活动作为应用程序的自定义 Application 类，它的 onCreate() 方法会在应用程序启动时首先被调用，因此可以在这里进行一些初始化操作
      * 进行应用程序的初始化设置，包括网络框架、数据库、服务等的初始化，并提供了一些必要的全局信息和服务。
@@ -25,6 +27,7 @@ public class WeatherApp extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+
         //使用定位需要同意隐私合规政策
         LocationClient.setAgreePrivacy(true);
         //初始化网络框架
@@ -36,6 +39,15 @@ public class WeatherApp extends BaseApplication {
         //初始化Room数据库
         db = AppDatabase.getInstance(this);
         bindService(new Intent(this,MusicService.class),serviceConnection, Context.BIND_AUTO_CREATE);
+
+        // 同意百度地图 SDK 隐私政策
+        SDKInitializer.setAgreePrivacy(this, true);
+        //在使用SDK各组件之前初始化context信息，传入ApplicationContext
+        SDKInitializer.initialize(this);
+        //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置您使用的坐标类型.
+        //包括BD09LL和GCJ02两种坐标，默认是BD09LL坐标。
+        SDKInitializer.setCoordType(CoordType.BD09LL);
+
     }
 
     public static AppDatabase getDb() {

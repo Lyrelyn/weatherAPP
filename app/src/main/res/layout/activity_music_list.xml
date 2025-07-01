@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/musicbg"
+    android:background="@color/bg_color"
     android:fitsSystemWindows="false"
     tools:context=".ui.MusicListActivity">
 
@@ -53,4 +53,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/arrows_left_ic" />
 
+    <include
+        layout="@layout/layout_bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
